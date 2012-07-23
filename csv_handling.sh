@@ -10,7 +10,7 @@
 get_column() {
   local FILE="$1"
   local COLUMN=$2
-  cut -d, -f$COLUMN < $FILE
+  cut -d, -f$COLUMN < "$FILE"
 }
 
 # Returns n-th row of file 
@@ -21,7 +21,7 @@ get_column() {
 get_row() {
   local FILE="$1"
   local ROW=$2
-  sed -n "$ROW"p < $FILE
+  sed -n "$ROW"p < "$FILE"
 }
 
 # Merge files (attach first line file1 with first line file2 ...)
@@ -32,7 +32,7 @@ get_row() {
 # @example merge_columns_file a.csv b.csv
 merge_columns_file() {
   local FILES="$*"
-  paste -d , $FILES
+  paste -d , "$FILES"
 }
 
 # Displays number of columns for file with n X m columns
@@ -73,9 +73,9 @@ get_separated_columns() {
   local FILES="$*"
   local NR_FILES=$#
   local COLS=0
-  for F in $FILES  
+  for F in "$FILES"  
   do
-    colcnt , $F
+    colcnt , "$F"
     if [ $? -eq 0 ] ; then
       if [ $COLS -eq 0 ] ; then
         COLS=$COLCNT
@@ -95,9 +95,9 @@ get_separated_columns() {
   while [ $cnt1 -le $COLS ] 
   do
     local cnt2=1
-    for f in $FILES
+    for f in "$FILES"
     do
-      get_column $f $cnt1 > get_separated_columns_tmp_file_"$cnt1"_"$cnt2".tmp
+      get_column "$f" $cnt1 > get_separated_columns_tmp_file_"$cnt1"_"$cnt2".tmp
       cnt2=$(($cnt2+1))
     done
     merge_columns_file get_separated_columns_tmp_file_"$cnt1"_*.tmp > column_"$cnt1"_merged.csv
@@ -114,8 +114,8 @@ get_separated_columns() {
 add_headline2file() {
   local FILE="$1"
   local HL="$2"
-  echo $FILE
-  echo $HL > $FILE.tmp
-  cat $FILE >> $FILE.tmp
-  mv $FILE.tmp $FILE
+  echo "$FILE"
+  echo "$HL" > "$FILE".tmp
+  cat "$FILE" >> "$FILE".tmp
+  mv "$FILE".tmp "$FILE"
 }
