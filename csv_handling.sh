@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # CSV handling
 # David Vorgrimmler
 
@@ -8,7 +8,7 @@
 # @return column x from csv_file
 # @example get_column a.csv 1
 get_column() {
-  local FILE=$1
+  local FILE="$1"
   local COLUMN=$2
   cut -d, -f$COLUMN < $FILE
 }
@@ -19,7 +19,7 @@ get_column() {
 # @return row x from csv_file
 # @example get_row a.csv 1
 get_row() {
-  local FILE=$1
+  local FILE="$1"
   local ROW=$2
   sed -n "$ROW"p < $FILE
 }
@@ -41,8 +41,8 @@ merge_columns_file() {
 # @return Sets variable $COLCNT to number of columns 
 # @example colcnt , a.csv; echo $COLCNT
 colcnt() {
-  local DELIM=$1;
-  local FILE=$2;
+  local FILE="$1";
+  local DELIM="$2";
   COLCNT=`awk -F"$DELIM" '{print NF}' "$FILE" | uniq`
   if [ $? -eq 0 ] ; then
     local TESTCOLCNT=`echo $COLCNT | tr -d ' '`
@@ -92,16 +92,11 @@ get_separated_columns() {
     fi
   done
   local cnt1=1
-  echo $COLS
-  #TEST="1 2 3"
   while [ $cnt1 -le $COLS ] 
   do
     local cnt2=1
     for f in $FILES
     do
-      echo $f
-      echo $cnt1
-      echo $cnt2
       get_column $f $cnt1 > get_separated_columns_tmp_file_"$cnt1"_"$cnt2".tmp
       cnt2=$(($cnt2+1))
     done
@@ -117,8 +112,8 @@ get_separated_columns() {
 # @return Inserts String at top of csv_file
 # @example add_headline2file abcd.txt bla,bla,blub 
 add_headline2file() {
-  local FILE=$1
-  local HL=$2
+  local FILE="$1"
+  local HL="$2"
   echo $FILE
   echo $HL > $FILE.tmp
   cat $FILE >> $FILE.tmp
