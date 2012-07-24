@@ -9,8 +9,8 @@
 # @example get_column a.csv 1
 get_column() {
   local FILE="$1"
-  local COLUMN=$2
-  cut -d, -f$COLUMN < "$FILE"
+  local COLUMN="$2"
+  cut -d, -f"$COLUMN" < "$FILE"
 }
 #get_column a.csv 1
 
@@ -22,7 +22,7 @@ get_column() {
 # @example get_row a.csv 1
 get_row() {
   local FILE="$1"
-  local ROW=$2
+  local ROW="$2"
   sed -n "$ROW"p < "$FILE"
 }
 #get_row a.csv 1
@@ -49,9 +49,9 @@ colcnt() {
   local DELIM="$2";
   COLCNT=`awk -F"$DELIM" '{print NF}' "$FILE" | uniq`
   if [ $? -eq 0 ] ; then
-    local TESTCOLCNT=`echo $COLCNT | tr -d ' '`
-    if [ ${#COLCNT} -gt 0 ] && [ $TESTCOLCNT -gt 0 ] ; then
-      if [ $TESTCOLCNT -eq $COLCNT ] ; then
+    local TESTCOLCNT="`echo $COLCNT | tr -d ' '`"
+    if [ "${#COLCNT}" -gt 0 ] && [ "$TESTCOLCNT" -gt 0 ] ; then
+      if [ "$TESTCOLCNT" -eq "$COLCNT" ] ; then
         return 0
       else
         echo "colcnt failed. Different number of column per row in file: $FILE"
@@ -92,16 +92,16 @@ add_headline2file() {
 # @example get_separated_columns a.csv b.csv c.csv
 get_separated_columns() {
   local FILES="$*"
-  local NR_FILES=$#
-  local COLS=0
+  local NR_FILES="$#"
+  local COLS="0"
   for F in $FILES  
   do
-    colcnt "$F" ,
-    if [ $? -eq 0 ] ; then
-      if [ $COLS -eq 0 ] ; then
-        COLS=$COLCNT
+    colcnt "$F" ","
+    if [ "$?" -eq 0 ] ; then
+      if [ "$COLS" -eq 0 ] ; then
+        COLS="$COLCNT"
       else
-        if [ $COLS -eq $COLCNT ] ; then
+        if [ "$COLS" -eq "$COLCNT" ] ; then
           echo "Same number of columns"
         else
           echo "Input ERROR: get_separated_columns failed. Files have not the same number of columns: $F"
@@ -112,23 +112,23 @@ get_separated_columns() {
       return 1
     fi
   done
-  local cnt1=1
-  while [ $cnt1 -le $COLS ] 
+  local cnt1="1"
+  while [ "$cnt1" -le "$COLS" ] 
   do
-    local cnt2=1
+    local cnt2="1"
     for f in $FILES
     do
-      get_column "$f" $cnt1 > get_separated_columns_tmp_file_"$cnt1"_"$cnt2".tmp
-      
+      get_column "$f" "$cnt1" > get_separated_columns_tmp_file_"$cnt1"_"$cnt2".tmp
+      cnt2="$(($cnt2+1))"
     done
     NAME=""
-    #NAME="MCC_"
+    #NAME="KAZ_"
     merge_columns_file get_separated_columns_tmp_file_"$cnt1"_*.tmp > "$NAME"column_"$cnt1"_merged.csv
     #add_headline2file "$NAME"column_"$cnt1"_merged.csv MLE,MEAN,BBRC
     rm get_separated_columns_tmp_file_*.tmp
-    cnt1=$(($cnt1+1))
+    cnt1="$(($cnt1+1))"
   done
 }
-get_separated_columns a.csv b.csv c.csv
-#get_separated_columns ../exp3/bbrc_sample_MCC*
+#get_separated_columns a.csv b.csv c.csv
+#get_separated_columns ../exp3/bbrc_sample_KAZ*
 
