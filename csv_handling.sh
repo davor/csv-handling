@@ -83,6 +83,22 @@ add_headline2file() {
 }
 #add_headline2file abcd.txt bla,bla,blub 
 
+# Return field entry from csv_file
+# @param1 path/to/csv_file.csv
+# @param2 integer, colum number
+# @param3 integer, row number
+# @return field entry from csv_file
+# @example get_field_entry a.csv 1 1 
+get_field_entry() {
+  local FILE="$1"
+  local COLUMN="$2"
+  local ROW="$3"
+  get_row $FILE $ROW > get_field_entry_tmp_file.tmp
+  get_column get_field_entry_tmp_file.tmp $COLUMN > get_field_entry_tmp_file2.tmp
+  cat get_field_entry_tmp_file2.tmp
+  rm get_field_entry_tmp_file*.tmp
+}
+#get_field_entry a.csv 1 1 
 
 # Merge columns of different files and create new files for each column
 # @param1 path/to/csv_file_1.csv
@@ -123,12 +139,16 @@ get_separated_columns() {
     done
     NAME=""
     #NAME="KAZ_"
-    merge_columns_file get_separated_columns_tmp_file_"$cnt1"_*.tmp > "$NAME"column_"$cnt1"_merged.csv
-    #add_headline2file "$NAME"column_"$cnt1"_merged.csv MLE,MEAN,BBRC
+    TITLE=$(get_field_entry get_separated_columns_tmp_file_"$cnt1"_1.tmp 1 1)
+    echo $TITLE
+    merge_columns_file get_separated_columns_tmp_file_"$cnt1"_*.tmp > "$NAME"column_"$TITLE"_merged.csv
+    sed -i 1d  "$NAME"column_"$TITLE"_merged.csv
+
+    #add_headline2file "$NAME"column_"$TITLE"_merged.csv MLE,MEAN,BBRC
     rm get_separated_columns_tmp_file_*.tmp
     cnt1="$(($cnt1+1))"
   done
 }
 #get_separated_columns a.csv b.csv c.csv
-#get_separated_columns ../exp3/bbrc_sample_KAZ*
+#get_separated_columns ../exp3/bbrc_sample_KAZ_mle* ../exp3/bbrc_sample_KAZ_mean* ../exp3/bbrc_sample_KAZ_bbrc*
 
