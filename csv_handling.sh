@@ -19,13 +19,13 @@ get_column() {
 # @param1 path/to/csv_file.csv
 # @param2 integer (row number)
 # @return row x from csv_file
-# @example get_row a.csv 1
+# @example get_row a.csv 2
 get_row() {
   local FILE="$1"
   local ROW="$2"
   sed -n "$ROW"p < "$FILE"
 }
-#get_row a.csv 1
+#get_row a.csv 2
 
 # Merge files (attach first line file1 with first line file2 ...)
 # @param1 path/to/csv_file_1.csv
@@ -101,17 +101,44 @@ get_field_entry() {
 #get_field_entry a.csv 1 1 
 
 # Merge columns of different files and create new files for each column
-# @param1 path/to/csv_file_1.csv
-# @param2 path/to/csv_file_2.csv
-# @paramN path/to/csv_file_N.csv
+# @param1 -f "path/to/csv_file_1.csv path/to/csv_file_2.csv ... path/to/csv_file_n.csv"
+# @param2 -n "name1 name2 ... nameN"
 # @return  creates a file for each merged column 
-# @example get_separated_columns a.csv b.csv c.csv
+# @example get_separated_columns -f "a.csv b.csv c.csv" -n "first,second,third"
 get_separated_columns() {
-  local FILES="$*"
-  local NR_FILES="$#"
+  
+  USAGE="usage: $0 -f \"path/to/csv_file_1.csv path/to/csv_file_2.csv ... path/to/csv_file_n.csv\" -n \"name1,name2,...,nameN\""
+  if [ $# != 4 ] 
+  then
+    echo "get_separated_columns requires two named arguments."
+    echo $USAGE
+    exit 1
+  fi
+
+  local FILES=""
+  local NR_FILES=""
+  local METHODS=""
+
+  while getopts ":f: :n:" option; do
+    case "$option" in
+      f) FILES="$OPTARG"
+        ;;
+      n) METHODS="$OPTARG"
+        ;;
+      ?) echo "illegal option: $OPTARG" >&2
+        ;;
+      :) 
+        echo "Option -$OPTARG requires an argument." >&2
+        exit 1
+        ;;
+    esac
+  done
+  NR_FILES=$(($(echo $METHODS | tr -cd ',' | wc -c)+1))
+
   local COLS="0"
   for F in $FILES  
   do
+
     colcnt "$F" ","
     if [ "$?" -eq 0 ] ; then
       if [ "$COLS" -eq 0 ] ; then
@@ -144,11 +171,11 @@ get_separated_columns() {
     merge_columns_file get_separated_columns_tmp_file_"$cnt1"_*.tmp > "$NAME"column_"$TITLE"_merged.csv
     sed -i 1d  "$NAME"column_"$TITLE"_merged.csv
 
-    #add_headline2file "$NAME"column_"$TITLE"_merged.csv MLE,MEAN,BBRC
+    add_headline2file "$NAME"column_"$TITLE"_merged.csv "$METHODS" 
     rm get_separated_columns_tmp_file_*.tmp
     cnt1="$(($cnt1+1))"
   done
 }
-#get_separated_columns a.csv b.csv c.csv
-#get_separated_columns ../exp3/bbrc_sample_KAZ_mle* ../exp3/bbrc_sample_KAZ_mean* ../exp3/bbrc_sample_KAZ_bbrc*
+#get_separated_columns -f "a.csv b.csv c.csv" -n "first,second,third"
+#get_separated_columns -f "../exp3/bbrc_sample_KAZ_mle* ../exp3/bbrc_sample_KAZ_mean* ../exp3/bbrc_sample_KAZ_bbrc*" -n "MLE,MEAN,BBRC"
 
