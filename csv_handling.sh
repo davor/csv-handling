@@ -188,6 +188,6 @@ get_separated_columns() {
     cnt1="$(($cnt1+1))"
   done
 }
-get_separated_columns -f "a.csv b.csv c.csv" -n "first,second,third" -t "test"
+#get_separated_columns -f "a.csv b.csv c.csv" -n "first,second,third" -t "test"
 #get_separated_columns -f "../exp3/bbrc_sample_KAZ_mle* ../exp3/bbrc_sample_KAZ_mean* ../exp3/bbrc_sample_KAZ_bbrc*" -n "MLE,MEAN,BBRC" -t "KAZ"
 
