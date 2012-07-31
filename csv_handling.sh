@@ -103,14 +103,15 @@ get_field_entry() {
 # Merge columns of different files and create new files for each column
 # @param1 -f "path/to/csv_file_1.csv path/to/csv_file_2.csv ... path/to/csv_file_n.csv"
 # @param2 -n "name1 name2 ... nameN"
+# @param3 -t "title" will be used 
 # @return  creates a file for each merged column 
-# @example get_separated_columns -f "a.csv b.csv c.csv" -n "first,second,third"
+# @example get_separated_columns -f "a.csv b.csv c.csv" -n "first,second,third" -t "test"
 get_separated_columns() {
   
-  USAGE="usage: $0 -f \"path/to/csv_file_1.csv path/to/csv_file_2.csv ... path/to/csv_file_n.csv\" -n \"name1,name2,...,nameN\""
-  if [ $# != 4 ] 
+  local USAGE="usage: $0 -f \"path/to/csv_file_1.csv path/to/csv_file_2.csv ... path/to/csv_file_n.csv\" -n \"name1,name2,...,nameN\" -t \"title\""
+  if [ $# != 6 ] 
   then
-    echo "get_separated_columns requires two named arguments."
+    echo "get_separated_columns requires three named arguments."
     echo $USAGE
     exit 1
   fi
@@ -118,12 +119,15 @@ get_separated_columns() {
   local FILES=""
   local NR_FILES=""
   local METHODS=""
+  local TITLE=""
 
-  while getopts ":f: :n:" option; do
+  while getopts ":f: :n: :t:" option; do
     case "$option" in
       f) FILES="$OPTARG"
         ;;
       n) METHODS="$OPTARG"
+        ;;
+      t) TITLE="$OPTARG"
         ;;
       ?) echo "illegal option: $OPTARG" >&2
         ;;
@@ -133,6 +137,15 @@ get_separated_columns() {
         ;;
     esac
   done
+  
+  if [ "$TITLE" != "" ]
+  then
+    echo "The title is '$TITLE'. "
+  else
+    echo "Title has to be at least one character."
+    exit 1
+  fi
+  
   NR_FILES=$(($(echo $METHODS | tr -cd ',' | wc -c)+1))
 
   local COLS="0"
@@ -156,6 +169,7 @@ get_separated_columns() {
     fi
   done
   local cnt1="1"
+  mkdir -p "$TITLE"
   while [ "$cnt1" -le "$COLS" ] 
   do
     local cnt2="1"
@@ -164,18 +178,16 @@ get_separated_columns() {
       get_column "$f" "$cnt1" > get_separated_columns_tmp_file_"$cnt1"_"$cnt2".tmp
       cnt2="$(($cnt2+1))"
     done
-    NAME=""
-    #NAME="KAZ_"
-    TITLE=$(get_field_entry get_separated_columns_tmp_file_"$cnt1"_1.tmp 1 1)
-    echo $TITLE
-    merge_columns_file get_separated_columns_tmp_file_"$cnt1"_*.tmp > "$NAME"column_"$TITLE"_merged.csv
-    sed -i 1d  "$NAME"column_"$TITLE"_merged.csv
+    COLUMNTITLE=$(get_field_entry get_separated_columns_tmp_file_"$cnt1"_1.tmp 1 1)
+    RESULTFILE="$TITLE"/"$TITLE"_"$COLUMNTITLE".csv
+    merge_columns_file get_separated_columns_tmp_file_"$cnt1"_*.tmp > $RESULTFILE 
+    sed -i 1d $RESULTFILE
 
-    add_headline2file "$NAME"column_"$TITLE"_merged.csv "$METHODS" 
+    add_headline2file $RESULTFILE "$METHODS" 
     rm get_separated_columns_tmp_file_*.tmp
     cnt1="$(($cnt1+1))"
   done
 }
-#get_separated_columns -f "a.csv b.csv c.csv" -n "first,second,third"
-#get_separated_columns -f "../exp3/bbrc_sample_KAZ_mle* ../exp3/bbrc_sample_KAZ_mean* ../exp3/bbrc_sample_KAZ_bbrc*" -n "MLE,MEAN,BBRC"
+get_separated_columns -f "a.csv b.csv c.csv" -n "first,second,third" -t "test"
+#get_separated_columns -f "../exp3/bbrc_sample_KAZ_mle* ../exp3/bbrc_sample_KAZ_mean* ../exp3/bbrc_sample_KAZ_bbrc*" -n "MLE,MEAN,BBRC" -t "KAZ"
 
