@@ -113,7 +113,7 @@ get_separated_columns() {
   then
     echo "get_separated_columns requires three named arguments."
     echo $USAGE
-    exit 1
+    return 1
   fi
 
   local FILES=""
@@ -121,21 +121,28 @@ get_separated_columns() {
   local METHODS=""
   local TITLE=""
 
-  while getopts ":f: :n: :t:" option; do
-    case "$option" in
-      f) FILES="$OPTARG"
-        ;;
-      n) METHODS="$OPTARG"
-        ;;
-      t) TITLE="$OPTARG"
-        ;;
-      ?) echo "illegal option: $OPTARG" >&2
-        ;;
+  while [ "$1" != "" ]; do
+    case $1 in
+      -f)  shift
+          FILES="$1"
+          ;;
+      -n)  shift
+          METHODS="$1"
+          ;;
+      -t)  shift
+          TITLE="$1"
+          ;;
+      ?)  echo "illegal option: $OPTARG" >&2
+          echo $USAGE
+          return 1
+          ;;
       :) 
-        echo "Option -$OPTARG requires an argument." >&2
-        exit 1
-        ;;
+          echo "Option -$OPTARG requires an argument." >&2
+          echo $USAGE
+          return 1
+          ;;
     esac
+    shift
   done
   
   if [ "$TITLE" != "" ]
@@ -143,7 +150,8 @@ get_separated_columns() {
     echo "The title is '$TITLE'. "
   else
     echo "Title has to be at least one character."
-    exit 1
+    echo $USAGE
+    return 1
   fi
   
   NR_FILES=$(($(echo $METHODS | tr -cd ',' | wc -c)+1))
@@ -187,7 +195,7 @@ get_separated_columns() {
     rm get_separated_columns_tmp_file_*.tmp
     cnt1="$(($cnt1+1))"
   done
+  return 0
 }
 #get_separated_columns -f "a.csv b.csv c.csv" -n "first,second,third" -t "test"
 #get_separated_columns -f "../exp3/bbrc_sample_KAZ_mle* ../exp3/bbrc_sample_KAZ_mean* ../exp3/bbrc_sample_KAZ_bbrc*" -n "MLE,MEAN,BBRC" -t "KAZ"
-
