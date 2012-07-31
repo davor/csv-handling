@@ -74,12 +74,13 @@ colcnt() {
 # @return Inserts String at top of csv_file
 # @example add_headline2file abcd.txt bla,bla,blub 
 add_headline2file() {
+  local MV=$(which mv)
   local FILE="$1"
   local HL="$2"
   echo "$FILE"
   echo "$HL" > "$FILE".tmp
   cat "$FILE" >> "$FILE".tmp
-  mv "$FILE".tmp "$FILE"
+  $MV "$FILE".tmp "$FILE"
 }
 #add_headline2file abcd.txt bla,bla,blub 
 
