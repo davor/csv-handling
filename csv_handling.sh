@@ -132,12 +132,12 @@ get_separated_columns() {
       -t)  shift
           TITLE="$1"
           ;;
-      ?)  echo "illegal option: $OPTARG" >&2
+      ?)  echo "illegal option: $1" >&2
           echo $USAGE
           return 1
           ;;
       :) 
-          echo "Option -$OPTARG requires an argument." >&2
+          echo "Option -$1 requires an argument." >&2
           echo $USAGE
           return 1
           ;;
